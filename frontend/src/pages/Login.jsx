@@ -1,0 +1,199 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../services/api';
+import useAuthStore from '../context/authStore';
+
+const ROLES = [
+  { value: 'admin', label: 'Admin', icon: 'admin_panel_settings' },
+  { value: 'researcher', label: 'Researcher', icon: 'analytics' },
+  { value: 'viewer', label: 'Viewer', icon: 'visibility' },
+];
+
+export default function Login() {
+  const [selectedRole, setSelectedRole] = useState('viewer');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { data } = await api.post('/auth/login', { email, password });
+      login(data.token, data.user);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Check your credentials.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen overflow-hidden">
+      {/* Left panel */}
+      <section className="hidden lg:flex lg:w-3/5 relative bg-primary overflow-hidden items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-[#0a3d6b] opacity-90" />
+        <div className="relative z-10 p-20 max-w-2xl">
+          <div className="flex items-center gap-3 mb-8">
+            <span className="material-symbols-outlined text-white text-[48px]">water_drop</span>
+            <div>
+              <h1 className="text-white font-bold text-headline-lg">Groundwater Resource</h1>
+              <p className="text-on-primary-container text-label-caps uppercase tracking-widest opacity-80">
+                Management System
+              </p>
+            </div>
+          </div>
+          <h2 className="text-white text-display font-bold mb-6 leading-tight">
+            Securing National Hydrological Infrastructure.
+          </h2>
+          <p className="text-on-primary-container text-body-lg leading-relaxed mb-12 opacity-90">
+            The Resource Management Console provides secure, centralized access to real-time aquifer
+            monitoring, extraction analytics, and regional water security assessments.
+          </p>
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { value: '5', label: 'Active Stations' },
+              { value: '99.9%', label: 'System Uptime' },
+              { value: 'Real-Time', label: 'Data Latency' },
+            ].map(stat => (
+              <div key={stat.label} className="bg-primary-container/40 backdrop-blur p-4 rounded border border-white/10">
+                <span className="text-white font-bold text-tabular-nums block">{stat.value}</span>
+                <span className="text-on-primary-container text-label-caps opacity-70">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="absolute bottom-8 left-12 right-12 flex justify-between text-on-primary-container/40 text-label-caps">
+          <span>DEPARTMENT OF ENVIRONMENTAL INFRASTRUCTURE</span>
+          <span>V 1.0.0</span>
+        </div>
+      </section>
+
+      {/* Right login panel */}
+      <main className="w-full lg:w-2/5 flex flex-col items-center justify-center p-8 bg-surface">
+        <div className="w-full max-w-md">
+          <div className="lg:hidden flex items-center gap-2 mb-10">
+            <span className="material-symbols-outlined text-primary text-[32px]">water_drop</span>
+            <span className="text-primary font-bold text-headline-md">Resource Management Console</span>
+          </div>
+
+          <div className="mb-8">
+            <h3 className="text-on-surface font-bold text-headline-lg mb-1">Authorized Access Only</h3>
+            <p className="text-on-surface-variant text-body-md">
+              Log in to the Groundwater Resource Evaluation System.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Role selector */}
+            <div className="space-y-2">
+              <label className="text-label-caps text-on-surface-variant block">SELECT SYSTEM ROLE</label>
+              <div className="grid grid-cols-3 gap-3">
+                {ROLES.map(role => (
+                  <button
+                    key={role.value}
+                    type="button"
+                    onClick={() => setSelectedRole(role.value)}
+                    className={`flex flex-col items-center justify-center p-3 border rounded transition-all ${
+                      selectedRole === role.value
+                        ? 'border-secondary bg-secondary-fixed text-on-secondary-fixed'
+                        : 'border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low text-on-surface'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined mb-1">{role.icon}</span>
+                    <span className="text-label-caps">{role.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Inputs */}
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-label-caps text-on-surface-variant">
+                  Government ID / Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  placeholder="e.g. admin@gov.env"
+                  className="w-full h-12 px-4 border border-outline-variant rounded bg-transparent text-on-surface text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-label-caps text-on-surface-variant">
+                  Security Passphrase
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••••••"
+                  className="w-full h-12 px-4 border border-outline-variant rounded bg-transparent text-on-surface text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-status-critical text-body-sm bg-error-container/30 px-3 py-2 rounded border border-status-critical/20">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 bg-primary text-on-primary font-bold text-body-md rounded hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {loading ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                  Authenticating...
+                </>
+              ) : (
+                <>
+                  <span>Secure Sign In</span>
+                  <span className="material-symbols-outlined text-[20px]">login</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Link to Register */}
+          <div className="mt-6 text-center">
+            <p className="text-body-sm text-on-surface-variant">
+              Need access?{' '}
+              <Link to="/register" className="text-secondary hover:underline font-bold">
+                Register for Access
+              </Link>
+            </p>
+          </div>
+
+          {/* Demo credentials hint */}
+          <div className="mt-8 p-4 bg-surface-container-low rounded border border-border-subtle">
+            <div className="flex gap-3">
+              <span className="material-symbols-outlined text-status-warning">info</span>
+              <div>
+                <p className="text-body-sm font-bold text-on-surface">Demo Credentials</p>
+                <p className="text-body-sm text-on-surface-variant mt-1">
+                  Admin: <code className="bg-surface-container px-1 rounded">admin@gov.env</code> / <code className="bg-surface-container px-1 rounded">admin123</code>
+                </p>
+                <p className="text-body-sm text-on-surface-variant">
+                  Viewer: <code className="bg-surface-container px-1 rounded">viewer@gov.env</code> / <code className="bg-surface-container px-1 rounded">viewer123</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

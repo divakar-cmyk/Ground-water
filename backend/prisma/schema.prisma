@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Station {
+  station_id           Int       @id @default(autoincrement())
+  station_name         String    @db.VarChar(100)
+  location             String?   @db.VarChar(150)
+  latitude             Decimal?  @db.Decimal(9, 6)
+  longitude            Decimal?  @db.Decimal(9, 6)
+  aquifer_type         String?   @db.VarChar(50)
+  critical_threshold_m Decimal   @db.Decimal(6, 2)
+  safe_decline_limit   Decimal   @db.Decimal(6, 3)
+  installed_date       DateTime? @db.Date
+  is_active            Boolean   @default(true)
+
+  readings      WaterLevelReading[]
+  trend_analysis TrendAnalysis[]
+  alerts        Alert[]
+
+  @@map("stations")
+}
+
+model WaterLevelReading {
+  reading_id   Int      @id @default(autoincrement())
+  station_id   Int
+  water_level_m Decimal @db.Decimal(6, 2)
+  recorded_at  DateTime @db.DateTime(0)
+  data_quality String   @default("good") @db.VarChar(20)
+  created_at   DateTime @default(now())
+
+  station Station @relation(fields: [station_id], references: [station_id])
+
+  @@unique([station_id, recorded_at])
+  @@map("water_level_readings")
+}
+
+model TrendAnalysis {
+  analysis_id  Int      @id @default(autoincrement())
+  station_id   Int
+  period       String?  @db.VarChar(20)
+  avg_level    Decimal? @db.Decimal(6, 2)
+  decline_rate Decimal? @db.Decimal(6, 3)
+  status       String   @default("normal") @db.VarChar(20)
+  computed_at  DateTime @default(now())
+
+  station Station @relation(fields: [station_id], references: [station_id])
+
+  @@map("trend_analysis")
+}
+
+model Alert {
+  alert_id     Int       @id @default(autoincrement())
+  station_id   Int
+  alert_type   String?   @db.VarChar(50)
+  message      String?   @db.Text
+  severity     String    @default("warning") @db.VarChar(20)
+  triggered_at DateTime  @default(now())
+  resolved     Boolean   @default(false)
+  resolved_at  DateTime?
+
+  station Station @relation(fields: [station_id], references: [station_id])
+
+  @@map("alerts")
+}
+
+model User {
+  user_id       Int      @id @default(autoincrement())
+  name          String?  @db.VarChar(100)
+  email         String   @unique @db.VarChar(100)
+  password_hash String   @db.VarChar(255)
+  role          String   @default("viewer") @db.VarChar(20)
+  created_at    DateTime @default(now())
+
+  @@map("users")
+}

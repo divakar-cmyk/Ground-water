@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background-color: #F4F7F9;
+  color: #1a1c1c;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+/* Compact scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c2c7d0; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #727780; }
+
+/* Zebra table rows */
+.zebra-table tbody tr:nth-child(even) {
+  background-color: rgba(244, 247, 249, 0.6);
+}
+
+/* Table baseline alignment */
+.zebra-table th,
+.zebra-table td {
+  vertical-align: middle;
+}
