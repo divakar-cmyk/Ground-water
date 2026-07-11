@@ -5,8 +5,14 @@ const { verifyToken, isAdmin } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
-router.get('/', verifyToken, stationsController.getStations);
-router.get('/:id', verifyToken, stationsController.getStationById);
+router.get('/', (req, res, next) => {
+  if (req.headers.authorization) return verifyToken(req, res, next);
+  return stationsController.getStations(req, res);
+});
+router.get('/:id', (req, res, next) => {
+  if (req.headers.authorization) return verifyToken(req, res, next);
+  return stationsController.getStationById(req, res);
+});
 
 router.post(
   '/',

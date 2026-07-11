@@ -20,7 +20,7 @@ const CRITICAL_STATION_ID = criticalIdx !== -1 ? parseInt(args[criticalIdx + 1])
 const intervalIdx = args.indexOf('--interval');
 const INTERVAL_MS = intervalIdx !== -1 ? parseInt(args[intervalIdx + 1]) : 5000;
 
-// Station definitions — must match seeded station_ids (1–5)
+// Station definitions — must match seeded station_ids (1–8)
 // water_level_m is depth to water table (higher = deeper = worse)
 const stations = [
   { station_id: 1, name: 'DWLR-101', currentLevel: 18.0,  trendPerInterval: 0.002,  noise: 0.08 },
@@ -28,6 +28,9 @@ const stations = [
   { station_id: 3, name: 'DWLR-303', currentLevel: 9.5,   trendPerInterval: 0.001,  noise: 0.06 },
   { station_id: 4, name: 'DWLR-402', currentLevel: 28.5,  trendPerInterval: 0.015,  noise: 0.10 }, // Demo critical station
   { station_id: 5, name: 'DWLR-505', currentLevel: 32.0,  trendPerInterval: 0.003,  noise: 0.09 },
+  { station_id: 6, name: 'DWLR-606', currentLevel: 21.8,  trendPerInterval: 0.004,  noise: 0.07 },
+  { station_id: 7, name: 'DWLR-707', currentLevel: 16.4,  trendPerInterval: 0.003,  noise: 0.06 },
+  { station_id: 8, name: 'DWLR-808', currentLevel: 19.2,  trendPerInterval: 0.002,  noise: 0.05 },
 ];
 
 function gaussianNoise(stdDev) {
