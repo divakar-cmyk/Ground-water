@@ -103,6 +103,26 @@ async function createStation(req, res) {
   }
 }
 
+async function deleteStation(req, res) {
+  const id = parseInt(req.params.id);
+  try {
+    const existing = await prisma.station.findUnique({ where: { station_id: id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Station not found', code: 'STATION_NOT_FOUND' });
+    }
+
+    await prisma.alert.deleteMany({ where: { station_id: id } });
+    await prisma.trendAnalysis.deleteMany({ where: { station_id: id } });
+    await prisma.waterLevelReading.deleteMany({ where: { station_id: id } });
+    await prisma.station.delete({ where: { station_id: id } });
+
+    return res.json({ success: true, message: 'Station deleted successfully' });
+  } catch (err) {
+    console.error('Delete station error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
 async function updateStation(req, res) {
   const id = parseInt(req.params.id);
   const errors = validationResult(req);
@@ -139,4 +159,4 @@ async function updateStation(req, res) {
   }
 }
 
-module.exports = { getStations, getStationById, createStation, updateStation };
+module.exports = { getStations, getStationById, createStation, updateStation, deleteStation };

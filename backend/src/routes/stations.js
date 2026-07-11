@@ -42,4 +42,11 @@ router.put(
   stationsController.updateStation
 );
 
+router.delete(
+  '/:id',
+  verifyToken,
+  isAdmin,
+  stationsController.deleteStation
+);
+
 module.exports = router;

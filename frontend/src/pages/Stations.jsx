@@ -6,6 +6,7 @@ import StationFormModal from '../components/StationFormModal';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
 import { LoadingState, ErrorState } from '../components/States';
 import { getStations, createStation, updateStation, deleteStation } from '../services/stationService';
+import useAuthStore from '../context/authStore';
 
 export default function Stations() {
   const [stations, setStations] = useState([]);
@@ -14,6 +15,8 @@ export default function Stations() {
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const navigate = useNavigate();
+  const { isAdmin } = useAuthStore();
+  const canManageStations = isAdmin();
 
   // Modal state
   const [formOpen, setFormOpen] = useState(false);
@@ -93,11 +96,19 @@ export default function Stations() {
 
   // ── Derived ─────────────────────────────────────────────────────────────────
 
-  const filtered = stations.filter(s =>
-    !search ||
-    s.station_name.toLowerCase().includes(search.toLowerCase()) ||
-    (s.location || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const normalizedSearch = (search || '').toString().trim().toLowerCase();
+
+  const filtered = stations.filter(s => {
+    if (!normalizedSearch) return true;
+
+    const stationName = (s.station_name || '').toString().toLowerCase();
+    const location = (s.location || '').toString().toLowerCase();
+    const stationId = (s.station_id || '').toString().toLowerCase();
+
+    return stationName.includes(normalizedSearch)
+      || location.includes(normalizedSearch)
+      || stationId.includes(normalizedSearch);
+  });
 
   if (loading) return <AppLayout title="Station Details"><LoadingState /></AppLayout>;
   if (error) return <AppLayout title="Station Details"><ErrorState message={error} onRetry={load} /></AppLayout>;
@@ -128,13 +139,15 @@ export default function Stations() {
             </div>
 
             {/* Add Station */}
-            <button
-              onClick={handleAdd}
-              className="flex items-center gap-2 h-9 px-4 bg-primary text-on-primary text-label-caps rounded hover:opacity-90 active:scale-95 transition-all shrink-0"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Add Station
-            </button>
+            {canManageStations && (
+              <button
+                onClick={handleAdd}
+                className="flex items-center gap-2 h-9 px-4 bg-primary text-on-primary text-label-caps rounded hover:opacity-90 active:scale-95 transition-all shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                Add Station
+              </button>
+            )}
           </div>
         </div>
 
@@ -149,13 +162,13 @@ export default function Stations() {
                 <th className="px-6 py-3 align-middle">Trend (m/mo)</th>
                 <th className="px-6 py-3 align-middle">Status</th>
                 <th className="px-6 py-3 align-middle">Last Sync</th>
-                <th className="px-6 py-3 align-middle">Actions</th>
+                {canManageStations && <th className="px-6 py-3 align-middle">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-on-surface-variant text-body-sm">
+                  <td colSpan={canManageStations ? 7 : 6} className="px-6 py-10 text-center text-on-surface-variant text-body-sm">
                     No stations found.
                   </td>
                 </tr>

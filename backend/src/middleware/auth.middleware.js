@@ -28,7 +28,7 @@ function hasRole(roles) {
       return res.status(401).json({ success: false, message: 'Unauthorized.', code: 'UNAUTHORIZED' });
     }
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: `Forbidden. Role '${req.user.role}' lacks permissions.`, code: 'FORBIDDEN' });
+      return res.status(403).json({ success: false, message: 'Access denied: Admins only', code: 'FORBIDDEN' });
     }
     next();
   };

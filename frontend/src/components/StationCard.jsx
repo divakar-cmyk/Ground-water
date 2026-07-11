@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
+import useAuthStore from '../context/authStore';
 
 function timeAgo(dateStr) {
   if (!dateStr) return 'N/A';
@@ -21,7 +22,8 @@ function timeAgo(dateStr) {
  */
 export default function StationCard({ station, asRow = false, onView, onEdit, onDelete }) {
   const navigate = useNavigate();
-  const hasActions = onView || onEdit || onDelete;
+  const { isAdmin } = useAuthStore();
+  const hasActions = (onView || onEdit || onDelete) && isAdmin();
 
   const decline = station.decline_rate;
   const declineDisplay = decline != null
@@ -74,7 +76,7 @@ export default function StationCard({ station, asRow = false, onView, onEdit, on
                 View
               </button>
             )}
-            {onEdit && (
+            {onEdit && isAdmin() && (
               <button
                 onClick={e => { e.stopPropagation(); onEdit(station); }}
                 className="flex items-center gap-1 text-primary text-label-caps hover:underline"
@@ -84,7 +86,7 @@ export default function StationCard({ station, asRow = false, onView, onEdit, on
                 Edit
               </button>
             )}
-            {onDelete && (
+            {onDelete && isAdmin() && (
               <button
                 onClick={e => { e.stopPropagation(); onDelete(station); }}
                 className="flex items-center gap-1 text-status-critical text-label-caps hover:underline"
