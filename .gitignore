@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contain secrets)
+.env
+
+# Prisma generated client (platform-specific, must be regenerated on deploy)
+.prisma/
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

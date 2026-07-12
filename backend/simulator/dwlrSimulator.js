@@ -8,10 +8,23 @@
  */
 
 const http = require('http');
+const https = require('https');
 
-const API_HOST = process.env.API_HOST || 'localhost';
-const API_PORT = process.env.API_PORT || 5000;
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const API_PATH = '/api/readings';
+
+let API_HOST = 'localhost';
+let API_PORT = 5000;
+let API_PROTOCOL = 'http:';
+
+try {
+  const parsedUrl = new URL(BACKEND_URL);
+  API_HOST = parsedUrl.hostname;
+  API_PORT = parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80);
+  API_PROTOCOL = parsedUrl.protocol;
+} catch (e) {
+  console.error('Invalid BACKEND_URL, using default http://localhost:5000');
+}
 
 // Parse CLI args
 const args = process.argv.slice(2);
@@ -54,7 +67,8 @@ function postReading(payload) {
       }
     };
 
-    const req = http.request(options, (res) => {
+    const client = API_PROTOCOL === 'https:' ? https : http;
+    const req = client.request(options, (res) => {
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
