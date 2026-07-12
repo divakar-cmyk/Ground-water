@@ -1,20 +1,48 @@
 import { create } from 'zustand';
 
+function safeStorageGet(key) {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {}
+}
+
+function safeStorageRemove(key) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch {}
+}
+
 const useAuthStore = create((set, get) => ({
-  token: localStorage.getItem('gw_token') || null,
+  token: safeStorageGet('gw_token') || null,
   user: (() => {
-    try { return JSON.parse(localStorage.getItem('gw_user')); } catch { return null; }
+    try {
+      const raw = safeStorageGet('gw_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   })(),
 
   login(token, user) {
-    localStorage.setItem('gw_token', token);
-    localStorage.setItem('gw_user', JSON.stringify(user));
+    safeStorageSet('gw_token', token);
+    safeStorageSet('gw_user', JSON.stringify(user));
     set({ token, user });
   },
 
   logout() {
-    localStorage.removeItem('gw_token');
-    localStorage.removeItem('gw_user');
+    safeStorageRemove('gw_token');
+    safeStorageRemove('gw_user');
     set({ token: null, user: null });
   },
 

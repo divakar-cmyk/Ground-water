@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 
@@ -16,7 +16,34 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [activeStationsCount, setActiveStationsCount] = useState('—');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadActiveStationsCount() {
+      try {
+        const { data } = await api.get('/stations/active-count');
+        if (isMounted) {
+          setActiveStationsCount(data?.count ?? 0);
+        }
+      } catch (err) {
+        console.error('Failed to load active stations count', err);
+        if (isMounted) {
+          setActiveStationsCount('—');
+        }
+      }
+    }
+
+    loadActiveStationsCount();
+    const intervalId = window.setInterval(loadActiveStationsCount, 15000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -73,7 +100,7 @@ export default function Register() {
           </p>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { value: '5', label: 'Active Stations' },
+              { value: activeStationsCount, label: 'Active Stations' },
               { value: '99.9%', label: 'System Uptime' },
               { value: 'Real-Time', label: 'Data Latency' },
             ].map(stat => (

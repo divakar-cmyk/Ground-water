@@ -10,6 +10,10 @@ export function useConnectionStatus() {
 
   useEffect(() => {
     const s = getSocket();
+    if (!s || typeof s.on !== 'function' || typeof s.off !== 'function') {
+      setStatus('disconnected');
+      return undefined;
+    }
     const onConnect = () => setStatus('connected');
     const onDisconnect = () => setStatus('disconnected');
     const onReconnecting = () => setStatus('reconnecting');
@@ -43,6 +47,7 @@ export function useSocketConnection() {
   const status = useConnectionStatus();
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     // Only connect after a token exists AND we are no longer on the login page.
     // This prevents the socket from firing a 401 mid-login and reloading the page.
     if (token && window.location.pathname !== '/login') {

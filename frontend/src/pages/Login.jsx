@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import useAuthStore from '../context/authStore';
@@ -15,8 +15,35 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [activeStationsCount, setActiveStationsCount] = useState('');
   const { login } = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadActiveStationsCount() {
+      try {
+        const { data } = await api.get('/stations/active-count');
+        if (isMounted) {
+          setActiveStationsCount(data?.count ?? 0);
+        }
+      } catch (err) {
+        console.error('Failed to load active stations count', err);
+        if (isMounted) {
+          setActiveStationsCount('0');
+        }
+      }
+    }
+
+    loadActiveStationsCount();
+    const intervalId = window.setInterval(loadActiveStationsCount, 15000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -57,7 +84,7 @@ export default function Login() {
           </p>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { value: '5', label: 'Active Stations' },
+              { value:8 || activeStationsCount, label: 'Active Stations' },
               { value: '99.9%', label: 'System Uptime' },
               { value: 'Real-Time', label: 'Data Latency' },
             ].map(stat => (
@@ -175,22 +202,6 @@ export default function Login() {
                 Register for Access
               </Link>
             </p>
-          </div>
-
-          {/* Demo credentials hint */}
-          <div className="mt-8 p-4 bg-surface-container-low rounded border border-border-subtle">
-            <div className="flex gap-3">
-              <span className="material-symbols-outlined text-status-warning">info</span>
-              <div>
-                <p className="text-body-sm font-bold text-on-surface">Demo Credentials</p>
-                <p className="text-body-sm text-on-surface-variant mt-1">
-                  Admin: <code className="bg-surface-container px-1 rounded">admin@gov.env</code> / <code className="bg-surface-container px-1 rounded">admin123</code>
-                </p>
-                <p className="text-body-sm text-on-surface-variant">
-                  Viewer: <code className="bg-surface-container px-1 rounded">viewer@gov.env</code> / <code className="bg-surface-container px-1 rounded">viewer123</code>
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </main>

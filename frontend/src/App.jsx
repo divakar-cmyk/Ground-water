@@ -20,7 +20,11 @@ function ProtectedRoute({ children, adminOnly = false }) {
 
 function AppWithSocket() {
   // Opens/closes socket based on auth token — runs for the lifetime of the app
-  useSocketConnection();
+  try {
+    useSocketConnection();
+  } catch (err) {
+    console.error('Socket hook failed', err);
+  }
 
   return (
     <Routes>
@@ -46,8 +50,8 @@ function AppWithSocket() {
         <ProtectedRoute adminOnly><AdminPanel /></ProtectedRoute>
       } />
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

@@ -9,6 +9,7 @@ router.get('/', (req, res, next) => {
   if (req.headers.authorization) return verifyToken(req, res, next);
   return stationsController.getStations(req, res);
 });
+router.get('/active-count', stationsController.getActiveStationsCount);
 router.get('/:id', (req, res, next) => {
   if (req.headers.authorization) return verifyToken(req, res, next);
   return stationsController.getStationById(req, res);

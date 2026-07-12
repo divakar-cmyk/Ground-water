@@ -41,6 +41,16 @@ async function getStations(req, res) {
   }
 }
 
+async function getActiveStationsCount(req, res) {
+  try {
+    const count = await prisma.station.count({ where: { is_active: true } });
+    return res.json({ success: true, count });
+  } catch (err) {
+    console.error('Fetch active stations count error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
 async function getStationById(req, res) {
   const id = parseInt(req.params.id);
   try {
@@ -159,4 +169,4 @@ async function updateStation(req, res) {
   }
 }
 
-module.exports = { getStations, getStationById, createStation, updateStation, deleteStation };
+module.exports = { getStations, getActiveStationsCount, getStationById, createStation, updateStation, deleteStation };
