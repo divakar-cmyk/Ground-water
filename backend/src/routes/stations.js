@@ -5,15 +5,15 @@ const { verifyToken, isAdmin } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
+// Verify the token if one is supplied, otherwise skip to the next handler.
+function optionalAuth(req, res, next) {
   if (req.headers.authorization) return verifyToken(req, res, next);
-  return stationsController.getStations(req, res);
-});
+  next();
+}
+
+router.get('/',    optionalAuth, stationsController.getStations);
 router.get('/active-count', stationsController.getActiveStationsCount);
-router.get('/:id', (req, res, next) => {
-  if (req.headers.authorization) return verifyToken(req, res, next);
-  return stationsController.getStationById(req, res);
-});
+router.get('/:id', optionalAuth, stationsController.getStationById);
 
 router.post(
   '/',

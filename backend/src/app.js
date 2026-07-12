@@ -27,7 +27,7 @@ app.use('/api/auth',      authRoutes);
 app.use('/api/stations',  stationRoutes);
 app.use('/api/readings',  readingRoutes);
 app.use('/api/alerts',    alertRoutes);
-app.use('/api/stations',  trendRoutes);
+app.use('/api/trends',    trendRoutes);
 app.use('/api/reports',   reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
